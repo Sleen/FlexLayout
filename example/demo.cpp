@@ -5,34 +5,34 @@
 #include <stdio.h>
 
 struct Node {
-	FlexNode* flexNode;
-	std::vector<Node*> children;
+    FlexNode* flexNode;
+    std::vector<Node*> children;
 
-	Node() {
-		flexNode = newFlexNode();
-		initFlexNode(flexNode);
-	}
+    Node() {
+        flexNode = newFlexNode();
+        initFlexNode(flexNode);
+    }
 
-	~Node() {
-		freeFlexNode(flexNode);
+    ~Node() {
+        freeFlexNode(flexNode);
         for (Node* child : children) {
-			delete child;
-		}
-	}
+            delete child;
+        }
+    }
 
-	static FlexNode* childAt(void* context, size_t index) {
-		Node *node = (Node *)context;
-		return node->children[index]->flexNode;
-	}
+    static FlexNode* childAt(void* context, size_t index) {
+        Node *node = (Node *)context;
+        return node->children[index]->flexNode;
+    }
 
-	void createTree() {
+    void createTree() {
         flexNode->context = this;
-		flexNode->childAt = Node::childAt;
-		flexNode->childrenCount = children.size();
+        flexNode->childAt = Node::childAt;
+        flexNode->childrenCount = children.size();
         for (Node* child : children) {
-			child->createTree();
-		}
-	}
+            child->createTree();
+        }
+    }
     
     void print(int indent = 0) {
         for (int i=0;i<indent;i++) {
@@ -51,26 +51,26 @@ struct Node {
 
 int main(int argc, char const *argv[])
 {
-	Node root;
-	root.flexNode->size[FLEX_WIDTH] = flexLength(100, FlexLengthTypeDefault);
-	root.flexNode->size[FLEX_HEIGHT] = flexLength(100, FlexLengthTypeDefault);
+    Node root;
+    root.flexNode->size[FLEX_WIDTH] = flexLength(100, FlexLengthTypeDefault);
+    root.flexNode->size[FLEX_HEIGHT] = flexLength(100, FlexLengthTypeDefault);
     root.flexNode->direction = FlexVertical;
-	root.flexNode->justifyContent = FlexCenter;
+    root.flexNode->justifyContent = FlexCenter;
 
-	Node *node1 = new Node();
-	node1->flexNode->size[FLEX_WIDTH] = flexLength(50, FlexLengthTypeDefault);
+    Node *node1 = new Node();
+    node1->flexNode->size[FLEX_WIDTH] = flexLength(50, FlexLengthTypeDefault);
     node1->flexNode->size[FLEX_HEIGHT] = flexLength(50, FlexLengthTypeDefault);
     node1->flexNode->alignSelf = FlexCenter;
-	root.children.push_back(node1);
+    root.children.push_back(node1);
 
-	Node *node2 = new Node();
+    Node *node2 = new Node();
     node2->flexNode->size[FLEX_HEIGHT] = flexLength(20, FlexLengthTypeDefault);
-	root.children.push_back(node2);
+    root.children.push_back(node2);
 
-	root.createTree();
-	layoutFlexNode(root.flexNode, FlexAuto, FlexAuto, 1);
+    root.createTree();
+    layoutFlexNode(root.flexNode, FlexAuto, FlexAuto, 1);
     
     root.print();
 
-	return 0;
+    return 0;
 }
