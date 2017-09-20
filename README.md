@@ -8,7 +8,7 @@
 
 ### Usage
 
-```
+```C
     FlexNodeRef root = Flex_newNode();
     
     FlexNodeRef child1 = Flex_newNode();
@@ -68,7 +68,7 @@ Licensed under the MIT License.
 
 ### 使用
 
-```
+```C
     FlexNodeRef root = Flex_newNode();
     
     FlexNodeRef child1 = Flex_newNode();

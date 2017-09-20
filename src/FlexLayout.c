@@ -392,7 +392,7 @@ void flex_baseline(FlexNodeRef node, float *ascender, float *descender) {
     if (descender) *descender = _descender;
 }
 
-FlexSize flex_measureNdoe(FlexNodeRef node, FlexSize availableSize) {
+FlexSize flex_measureNode(FlexNodeRef node, FlexSize availableSize) {
     if (node->measure) {
         for (int i = (int)FlexVector_size(FlexMeasureCache, node->measuredSizeCache) - 1; i >= 0; i--) {
             FlexSize key = node->measuredSizeCache->data[i].availableSize;
@@ -477,7 +477,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     // measure non-container element
     if (Flex_getChildrenCount(node) == 0) {
         if (!FlexIsResolved(resolvedWidth) || !FlexIsResolved(resolvedHeight)) {
-            FlexSize measuredSize = flex_measureNdoe(node, availableSize);
+            FlexSize measuredSize = flex_measureNode(node, availableSize);
             
             if (!FlexIsResolved(resolvedWidth)) {
                 node->result.size[FLEX_WIDTH] = flex_clamp(measuredSize.width + flex_inset(node->result.padding, FLEX_WIDTH), flex_resolve(node->minSize[FLEX_WIDTH], context, constrainedWidth), flex_resolve(node->maxSize[FLEX_WIDTH], context, constrainedWidth));
