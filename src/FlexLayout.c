@@ -26,6 +26,7 @@
 #define FlexLengthEquals(a, b) (FlexFloatEquals(a.value, b.value) && a.type == b.type)
 #define FlexPixelRound(value, scale) (roundf((value) * (scale)) / (scale))
 #define FlexIsResolved(n) !FlexIsUndefined(n)
+#define FlexCacheSizeUndefined (FlexSize){ -1000, -1000 }
 
 #define FlexVector(type) FlexVector_##type
 #define FlexVectorRef(type) FlexVector(type)*
@@ -179,6 +180,7 @@ typedef struct FlexNode {
     FlexBaselineFunc baseline;
 
     FlexVectorRef(FlexNodeRef) children;
+    FlexNodeRef parent;
     
     // internal fields
     float flexBaseSize;
@@ -232,10 +234,19 @@ static const FlexNode defaultFlexNode = {
     .baseline = NULL,
 
     .children = NULL,
+    .parent = NULL,
 
     .measuredSizeCache = NULL,
-    .lastConstrainedSize = { FlexUndefined, FlexUndefined },
+    .lastConstrainedSize = FlexCacheSizeUndefined,
 };
+
+
+void flex_markDirty(FlexNodeRef node) {
+    node->lastConstrainedSize = FlexCacheSizeUndefined;
+    if (node->parent) {
+        flex_markDirty(node->parent);
+    }
+}
 
 
 // implementation of getters and setters
@@ -245,16 +256,32 @@ static const FlexNode defaultFlexNode = {
     }
 #define FLEX_SETTER(type, Name, field) \
     void Flex_set##Name(FlexNodeRef node, type Name) { \
-        node->field = Name;\
+        if (node->field != Name) { \
+            node->field = Name; \
+            flex_markDirty(node); \
+        } \
+    }
+#define FLEX_SETTER_LENGTH(Name, field) \
+    void Flex_set##Name(FlexNodeRef node, FlexLength Name) { \
+        if (!FlexLengthEquals(node->field, Name)) { \
+            node->field = Name; \
+            flex_markDirty(node); \
+        } \
     }
 #define FLEX_SETTER_LENGTH_VALUE(Name, field, Type) \
     void Flex_set##Name(FlexNodeRef node, float Name) { \
-        node->field.type = FlexLengthType##Type; \
-        node->field.value = Name; \
+        FlexLength value = {FlexLengthType##Type, Name}; \
+        if (!FlexLengthEquals(node->field, value)) { \
+            node->field = value; \
+            flex_markDirty(node); \
+        } \
     }
 #define FLEX_SETTER_LENGTH_TYPE(Name, field, Type) \
     void Flex_set##Name##Type(FlexNodeRef node) { \
-        node->field.type = FlexLengthType##Type; \
+        if (node->field.type != FlexLengthType##Type) { \
+            node->field.type = FlexLengthType##Type; \
+            flex_markDirty(node); \
+        } \
     }
 
 FLEX_PROPERTYES()
@@ -263,6 +290,7 @@ FLEX_RESULT_PROPERTYES()
 
 #undef FLEX_GETTER
 #undef FLEX_SETTER
+#undef FLEX_SETTER_LENGTH
 #undef FLEX_SETTER_LENGTH_VALUE
 #undef FLEX_SETTER_LENGTH_TYPE
 
@@ -469,7 +497,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
         node->lastConstrainedSize = availableSize;
     }
     else {
-        node->lastConstrainedSize = (FlexSize){NAN, NAN};
+        node->lastConstrainedSize = FlexCacheSizeUndefined;
     }
     node->lastSize[FLEX_WIDTH] = node->size[FLEX_WIDTH];
     node->lastSize[FLEX_HEIGHT] = node->size[FLEX_HEIGHT];
@@ -1279,6 +1307,7 @@ void Flex_insertChild(FlexNodeRef node, FlexNodeRef child, size_t index) {
     if (!node->children) {
         node->children = FlexVector_new(FlexNodeRef, 4);
     }
+    flex_markDirty(node);
     FlexVector_insert(FlexNodeRef, node->children, child, index);
 }
 
@@ -1286,11 +1315,13 @@ void Flex_addChild(FlexNodeRef node, FlexNodeRef child) {
     if (!node->children) {
         node->children = FlexVector_new(FlexNodeRef, 4);
     }
+    flex_markDirty(node);
     FlexVector_add(FlexNodeRef, node->children, child);
 }
 
 void Flex_removeChild(FlexNodeRef node, FlexNodeRef child) {
     FlexVector_remove(FlexNodeRef, node->children, child);
+    flex_markDirty(node);
 }
 
 FlexNodeRef Flex_getChild(FlexNodeRef node, size_t index) {

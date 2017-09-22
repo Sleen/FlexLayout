@@ -94,7 +94,7 @@ typedef float       (*FlexBaselineFunc)(void* context, FlexSize constrainedSize)
 #define FLEX_FLOAT_PROPERTY(Name, field) FLEX_PROPERTY(float, Name, field)
 #define FLEX_LENGTH_PROPERTY(Name, field) \
     FLEX_GETTER(FlexLength, Name, field) \
-    FLEX_SETTER(FlexLength, Name##_Length, field) \
+    FLEX_SETTER_LENGTH(Name##_Length, field) \
     FLEX_SETTER_LENGTH_VALUE(Name, field, Point) \
     FLEX_SETTER_LENGTH_VALUE(Name##Percent, field, Percent)
 #define FLEX_LENGTH_PROPERTY_AUTO(Name, field) \
@@ -168,6 +168,7 @@ typedef float       (*FlexBaselineFunc)(void* context, FlexSize constrainedSize)
 // declaration of getters and setters
 #define FLEX_GETTER(type, Name, field)                  type Flex_get##Name(FlexNodeRef node);
 #define FLEX_SETTER(type, Name, field)                  void Flex_set##Name(FlexNodeRef node, type Name);
+#define FLEX_SETTER_LENGTH(Name, field)                 FLEX_SETTER(FlexLength, Name, field)
 #define FLEX_SETTER_LENGTH_VALUE(Name, field, Type)     void Flex_set##Name(FlexNodeRef node, float Name);
 #define FLEX_SETTER_LENGTH_TYPE(Name, field, Type)      void Flex_set##Name##Type(FlexNodeRef node);
 
@@ -177,6 +178,7 @@ FLEX_RESULT_PROPERTYES()
 
 #undef FLEX_GETTER
 #undef FLEX_SETTER
+#undef FLEX_SETTER_LENGTH
 #undef FLEX_SETTER_LENGTH_VALUE
 #undef FLEX_SETTER_LENGTH_TYPE
 
