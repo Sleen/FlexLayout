@@ -83,6 +83,8 @@ Licensed under the MIT License.
 
     Flex_layout(root, FlexUndefined, FlexUndefined, 1);
     Flex_print(root, FlexPrintDefault);
+
+    Flex_freeNodeRecursive(root);
 ```
 
 ### 支持的特性

@@ -270,7 +270,7 @@ void flex_markDirty(FlexNodeRef node) {
     }
 #define FLEX_SETTER_LENGTH_VALUE(Name, field, Type) \
     void Flex_set##Name(FlexNodeRef node, float Name) { \
-        FlexLength value = {FlexLengthType##Type, Name}; \
+        FlexLength value = {Name, FlexLengthType##Type}; \
         if (!FlexLengthEquals(node->field, value)) { \
             node->field = value; \
             flex_markDirty(node); \

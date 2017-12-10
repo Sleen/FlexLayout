@@ -18,5 +18,7 @@ int main(int argc, char const *argv[])
     Flex_layout(root, FlexUndefined, FlexUndefined, 1);
     Flex_print(root, FlexPrintDefault);
 
+    Flex_freeNodeRecursive(root);
+
     return 0;
 }
