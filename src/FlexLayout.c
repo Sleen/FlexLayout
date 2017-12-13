@@ -557,7 +557,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     FlexSize resolvedMarginSize = {resolvedMarginWidth, resolvedMarginHeight};
     FlexSize resolvedPaddingSize = {resolvedPaddingWidth, resolvedPaddingHeight};
     
-    FlexLine* lines = malloc(sizeof(FlexLine) * flexItemsCount);
+    FlexLine* lines = (FlexLine*)malloc(sizeof(FlexLine) * (flexItemsCount > 0 ? flexItemsCount : 1));
     lines[0].itemsCount = 0;
     lines[0].itemsSize = 0;
     int linesCount = 1;
@@ -673,8 +673,8 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     float innerMainSize = node->result.size[mainAxis] - resolvedPaddingSize.size[mainAxis];
     
     // 6. Resolve the flexible lengths of all the flex items to find their used main size (see section 9.7.).
-    bool* isFrozen = malloc(sizeof(bool) * flexItemsCount);
-    char* violations = malloc(sizeof(char) * flexItemsCount);
+    bool* isFrozen = (bool*)malloc(sizeof(bool) * flexItemsCount);
+    char* violations = (char*)malloc(sizeof(char) * flexItemsCount);
     int lineStart = 0;
     for (i=0;i<linesCount;i++) {
         int count = lines[i].itemsCount;
@@ -1454,7 +1454,7 @@ void flex_printNode(FlexNodeRef node, FlexPrintOptions options, int indent) {
     }
 
     if (options == FlexPrintDefault) {
-        options = 0xffffffff;
+        options = (FlexPrintOptions)0xffffffff;
     }
 
     bool showUnspecified = !(options & FlexPrintHideUnspecified);
