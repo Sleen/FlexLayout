@@ -128,7 +128,7 @@ typedef enum {
 
 typedef struct {
     float itemsSize;
-    int itemsCount;
+    size_t itemsCount;
     float ascender;
 } FlexLine;
 
@@ -285,6 +285,7 @@ void flex_markDirty(FlexNodeRef node) {
     }
 
 FLEX_PROPERTYES()
+FLEX_CALLBACK_PROPERTIES()
 FLEX_EXT_PROPERTYES()
 FLEX_RESULT_PROPERTYES()
 
@@ -524,7 +525,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     FlexDirection mainAxis = flex_dim[node->direction];
     FlexDirection crossAxis = mainAxis == FlexHorizontal ? FlexVertical : FlexHorizontal;
     
-    int i, j;
+    size_t i, j;
     
     //  [flex items ----------->|<----------- fixed items]
     FlexNodeRef* items = (FlexNodeRef*)malloc(sizeof(FlexNode) * Flex_getChildrenCount(node));
@@ -560,7 +561,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     FlexLine* lines = (FlexLine*)malloc(sizeof(FlexLine) * (flexItemsCount > 0 ? flexItemsCount : 1));
     lines[0].itemsCount = 0;
     lines[0].itemsSize = 0;
-    int linesCount = 1;
+    size_t linesCount = 1;
     
     float spacing = flex_auto_to_0(flex_resolve(node->spacing, context, resolvedInnerSize.size[mainAxis]));
     float lineSpacing = flex_auto_to_0(flex_resolve(node->lineSpacing, context, resolvedInnerSize.size[crossAxis]));
@@ -675,11 +676,11 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     // 6. Resolve the flexible lengths of all the flex items to find their used main size (see section 9.7.).
     bool* isFrozen = (bool*)malloc(sizeof(bool) * flexItemsCount);
     char* violations = (char*)malloc(sizeof(char) * flexItemsCount);
-    int lineStart = 0;
+    size_t lineStart = 0;
     for (i=0;i<linesCount;i++) {
-        int count = lines[i].itemsCount;
-        int unfrozenCount = count;
-        int lineEnd = lineStart + count;
+        size_t count = lines[i].itemsCount;
+        size_t unfrozenCount = count;
+        size_t lineEnd = lineStart + count;
         
         // 6.1 Determine the used flex factor. Sum the outer hypothetical main sizes of all items on the line. If the sum is less than the flex container’s inner main size, use the flex grow factor for the rest of this algorithm; otherwise, use the flex shrink factor.
         float lineMainSize = 0;
@@ -868,7 +869,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     else {
         lineStart = 0;
         for (i=0;i<linesCount;i++) {
-            int lineEnd = lineStart + lines[i].itemsCount;
+            size_t lineEnd = lineStart + lines[i].itemsCount;
             
             float maxOuterHypotheticalCrossSize = 0;
             float maxAscender = 0;
@@ -932,7 +933,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     //     > Note that this step does not affect the main size of the flex item, even if it has an intrinsic aspect ratio.
     lineStart = 0;
     for (i=0;i<linesCount;i++) {
-        int lineEnd = lineStart + lines[i].itemsCount;
+        size_t lineEnd = lineStart + lines[i].itemsCount;
         
         for (j=lineStart;j<lineEnd;j++) {
             FlexNodeRef item = items[j];
@@ -964,7 +965,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     // 12. Distribute any remaining free space. For each flex line:
     lineStart = 0;
     for (i=0;i<linesCount;i++) {
-        int lineEnd = lineStart + lines[i].itemsCount;
+        size_t lineEnd = lineStart + lines[i].itemsCount;
         
         float lineMainSize = 0;
         for (j=lineStart;j<lineEnd;j++) {
@@ -976,7 +977,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
         float remainMainSize = innerMainSize - lineMainSize;
         //       1. If the remaining free space is positive and at least one main-axis margin on this line is auto, distribute the free space equally among these margins.
         if (remainMainSize > 0) {
-            int count = 0;
+            size_t count = 0;
             for (j=lineStart;j<lineEnd;j++) {
                 FlexNodeRef item = items[j];
                 if (FlexIsUndefined(item->resolvedMargin[flex_start[node->direction]])) count++;
@@ -1041,7 +1042,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     //       * If its outer cross size (treating those auto margins as zero) is less than the cross size of its flex line, distribute the difference in those sizes equally to the auto margins.
     lineStart = 0;
     for (i=0;i<linesCount;i++) {
-        int lineEnd = lineStart + lines[i].itemsCount;
+        size_t lineEnd = lineStart + lines[i].itemsCount;
         for (j=lineStart;j<lineEnd;j++) {
             FlexNodeRef item = items[j];
             
@@ -1138,7 +1139,7 @@ void flex_layoutInternal(FlexNodeRef node, FlexLayoutContext *context, FlexSize 
     }
     float lineCrossPositionStart = offsetStart;
     for (i=0;i<linesCount;i++) {
-        int lineEnd = lineStart + lines[i].itemsCount;
+        size_t lineEnd = lineStart + lines[i].itemsCount;
         for (j=lineStart;j<lineEnd;j++) {
             FlexNodeRef item = items[j];
             item->result.position[flex_start[crossAxis]] += isWrapReverse ? node->result.size[crossAxis] - lines[i].itemsSize - lineCrossPositionStart : lineCrossPositionStart;
@@ -1236,7 +1237,7 @@ void flex_setupProperties(FlexNodeRef node) {
     node->result.size[FLEX_HEIGHT] = NAN;
 #endif
     
-    for (int i=0;i<Flex_getChildrenCount(node);i++) {
+    for (size_t i=0;i<Flex_getChildrenCount(node);i++) {
         FlexNodeRef item = Flex_getChild(node, i);
         
         if (item->flexBasis.type == FlexLengthTypeAuto) {
@@ -1297,7 +1298,7 @@ void Flex_freeNode(FlexNodeRef node) {
 }
 
 void Flex_freeNodeRecursive(FlexNodeRef node) {
-    for (int i = 0; i < Flex_getChildrenCount(node); i++) {
+    for (size_t i = 0; i < Flex_getChildrenCount(node); i++) {
         Flex_freeNodeRecursive(Flex_getChild(node, i));
     }
     Flex_freeNode(node);
@@ -1485,6 +1486,8 @@ void flex_printNode(FlexNodeRef node, FlexPrintOptions options, int indent) {
         FLEX_PRINT(FlexLength, "line-spacing", lineSpacing);
         FLEX_PRINT(int, "lines", lines);
         FLEX_PRINT(int, "items-per-line", itemsPerLine);
+        FLEX_PRINT(bool, "has-measure-func", measure);
+        FLEX_PRINT(bool, "has-baseline-func", baseline);
     }
     if (options & FlexPrintResult) {
         FLEX_PRINT(float, "result-x", result.position[FLEX_LEFT]);
@@ -1496,7 +1499,7 @@ void flex_printNode(FlexNodeRef node, FlexPrintOptions options, int indent) {
     }
     if ((options & FlexPrintChildren) && Flex_getChildrenCount(node) > 0) {
         flex_printIndent(indent); printf("children: [\n");
-        for (int i=0;i<Flex_getChildrenCount(node);i++) {
+        for (size_t i=0;i<Flex_getChildrenCount(node);i++) {
             flex_printNode(Flex_getChild(node, i), options, indent + 1);
         }
         flex_printIndent(indent); printf("]\n");

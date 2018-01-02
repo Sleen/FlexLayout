@@ -140,6 +140,8 @@ typedef float       (*FlexBaselineFunc)(void* context, FlexSize constrainedSize)
     FLEX_FLOAT_PROPERTY                 (                   BorderStart,    border[FLEX_START]          ); \
     FLEX_FLOAT_PROPERTY                 (                   BorderEnd,      border[FLEX_END]            ); \
     FLEX_PROPERTY                       ( void*,            Context,        context                     ); \
+
+#define FLEX_CALLBACK_PROPERTIES() \
     FLEX_PROPERTY                       ( FlexMeasureFunc,  MeasureFunc,    measure                     ); \
     FLEX_PROPERTY                       ( FlexBaselineFunc, BaselineFunc,   baseline                    ); \
 
@@ -173,6 +175,7 @@ typedef float       (*FlexBaselineFunc)(void* context, FlexSize constrainedSize)
 #define FLEX_SETTER_LENGTH_TYPE(Name, field, Type)      void Flex_set##Name##Type(FlexNodeRef node);
 
 FLEX_PROPERTYES()
+FLEX_CALLBACK_PROPERTIES()
 FLEX_EXT_PROPERTYES()
 FLEX_RESULT_PROPERTYES()
 

@@ -8,6 +8,7 @@
 
 ### Usage
 
+#### C/C++
 ```C
     FlexNodeRef root = Flex_newNode();
     
@@ -23,6 +24,29 @@
 
     Flex_layout(root, FlexUndefined, FlexUndefined, 1);
     Flex_print(root, FlexPrintDefault);
+
+    Flex_freeNodeRecursive(root);
+```
+
+#### Javascript
+
+`FlexLayout` has ported to javascript by using [`nbind`](https://github.com/charto/nbind).
+
+```js
+    var root = new flex.Node();
+    root.direction = flex.Vertical;
+
+    var child1 = new flex.Node();
+    child1.width = new flex.Length(50);
+    child1.height = new flex.Length(50);
+    root.add(child1);
+
+    var child2 = new flex.Node();
+    child2.setMeasure(function(size){return new flex.Size(10, 10);});
+    root.add(child2);
+
+    root.layout(NaN, NaN);
+    root.print();
 ```
 
 ### Features
@@ -68,6 +92,7 @@ Licensed under the MIT License.
 
 ### 使用
 
+#### C/C++
 ```C
     FlexNodeRef root = Flex_newNode();
     
@@ -85,6 +110,27 @@ Licensed under the MIT License.
     Flex_print(root, FlexPrintDefault);
 
     Flex_freeNodeRecursive(root);
+```
+
+#### Javascript
+
+`FlexLayout` 使用 [`nbind`](https://github.com/charto/nbind) 移植了 javascript 版本。
+
+```js
+    var root = new flex.Node();
+    root.direction = flex.Vertical;
+
+    var child1 = new flex.Node();
+    child1.width = new flex.Length(50);
+    child1.height = new flex.Length(50);
+    root.add(child1);
+
+    var child2 = new flex.Node();
+    child2.setMeasure(function(size){return new flex.Size(10, 10);});
+    root.add(child2);
+
+    root.layout(NaN, NaN);
+    root.print();
 ```
 
 ### 支持的特性

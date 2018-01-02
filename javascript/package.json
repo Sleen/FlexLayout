@@ -1,0 +1,19 @@
+{
+  "name": "flex_layout",
+  "version": "0.1.0",
+  "scripts": {
+    "autogypi": "autogypi",
+    "node-gyp": "node-gyp",
+    "emcc-path": "emcc-path",
+    "copyasm": "copyasm",
+    "ndts": "ndts",
+    "install": "node-gyp configure build",
+    "browser": "node-gyp configure build --asmjs=1 && webpack && ndts . > out/FlexLayout.d.ts",
+    "test": "node demo.js"
+  },
+  "dependencies": {
+    "nbind": "^0.3.6",
+    "node-gyp": "^3.3.1",
+    "webpack": "^2.2.0-rc.2"
+  }
+}
